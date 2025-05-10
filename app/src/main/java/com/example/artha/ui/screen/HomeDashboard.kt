@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.artha.model.HistoryItemData
 import com.example.artha.model.PocketData
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +48,21 @@ fun HomeDashboard() {
     val totalPengeluaran = pocketList.sumOf { it.amount }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(Color(0xFFFFF8DC)) }
+    var selectedColor by remember { mutableStateOf(Color(0xFFFFFFCC)) }
+    val listState = rememberLazyListState()
+    var highlightedIndex by remember { mutableStateOf(-1) }
+    var shouldAnimateNewItem by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pocketList.size, shouldAnimateNewItem) {
+        if (shouldAnimateNewItem) {
+            delay(100)
+            listState.animateScrollToItem(pocketList.lastIndex)
+            highlightedIndex = pocketList.lastIndex
+            delay(600)
+            highlightedIndex = -1
+            shouldAnimateNewItem = false
+        }
+    }
 
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -60,6 +76,7 @@ fun HomeDashboard() {
                 onColorChange = { selectedColor = it },
                 onAddPocket = { newPocket ->
                     pocketList = pocketList + newPocket
+                    shouldAnimateNewItem = true
                 }
             )
         }
@@ -136,7 +153,7 @@ fun HomeDashboard() {
                     }
                 }
             } else {
-                LazyRow {
+                LazyRow(state = listState) {
                     itemsIndexed(pocketList) { index, pocket ->
                         val horizontalPadding = 12.dp
                         val startPadding = if (index == 0) 20.dp else horizontalPadding
@@ -147,6 +164,7 @@ fun HomeDashboard() {
                             amount = pocket.amount,
                             percentage = pocket.percentage,
                             backgroundColor = pocket.backgroundColor,
+                            isHighlighted = index == highlightedIndex,
                             modifier = Modifier
                                 .padding(start = startPadding, end = endPadding)
                                 .width(200.dp)

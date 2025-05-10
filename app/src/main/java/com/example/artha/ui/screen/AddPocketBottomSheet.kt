@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ fun AddPocketBottomSheet(
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var target by remember { mutableStateOf(TextFieldValue("")) }
     val isFormValid = title.text.isNotBlank() && target.text.contains(Regex("\\d"))
+    val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -65,7 +67,8 @@ fun AddPocketBottomSheet(
                     } else {
                         ""
                     }
-                    target = newValue.copy(text = formatted, selection = TextRange(formatted.length))
+                    target =
+                        newValue.copy(text = formatted, selection = TextRange(formatted.length))
                 },
                 shape = RoundedCornerShape(10.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -79,7 +82,10 @@ fun AddPocketBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
             Text("Pilih Warna")
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(vertical = 12.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(vertical = 12.dp)
+            ) {
                 listOf(
                     Color(0xFFFFFFCC), Color(0xFFCFFFE0),
                     Color(0xFFD1E8FF), Color(0xFFFFD1DC),
@@ -106,22 +112,32 @@ fun AddPocketBottomSheet(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                enabled = isFormValid,
-                onClick = {
-                    val pocket = PocketData(
-                        title = title.text,
-                        amount = 0,
-                        backgroundColor = selectedColor,
-                        percentage = 0
-                    )
-                    onAddPocket(pocket)
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5AB0F6))
+            val backgroundColor = if (isFormValid) Color(0xFF5AB0F6) else Color(0xFFB0BEC5)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(backgroundColor) // <- ini yang ngasih warna
+                    .clickable(
+                        enabled = isFormValid,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(bounded = true),
+                        onClick = {
+                            val pocket = PocketData(
+                                title = title.text,
+                                amount = 0,
+                                backgroundColor = selectedColor,
+                                percentage = 0
+                            )
+                            onAddPocket(pocket)
+                            onDismiss()
+                        }
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text("Simpan", color = Color.White)
+                Text("Simpan", color = Color.White, style = MaterialTheme.typography.titleMedium)
             }
         }
     }
