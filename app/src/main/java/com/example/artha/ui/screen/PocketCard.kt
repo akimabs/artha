@@ -45,6 +45,7 @@ fun PocketCard(
     val progressColor = if (isOverBudget) Color.Red else Color(0xFF4CAF50)
     val percentTextColor = if (isOverBudget) Color.Red else Color.Black
     val progress = percentage.coerceIn(0, 100) / 100f
+    val formattedPercentage = remember(percentage) { "%,d".format(percentage) }
 
     Card(
         modifier = modifier
@@ -70,6 +71,14 @@ fun PocketCard(
             }
 
             Column {
+                if (isOverBudget) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "Overbudget!",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 Text(formattedAmount, style = MaterialTheme.typography.headlineSmall)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -87,18 +96,9 @@ fun PocketCard(
                         trackColor = Color.LightGray
                     )
                     Text(
-                        "$percentage%",
+                        "$formattedPercentage%",
                         style = MaterialTheme.typography.labelMedium,
                         color = percentTextColor
-                    )
-                }
-
-                if (isOverBudget) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "Overbudget!",
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
