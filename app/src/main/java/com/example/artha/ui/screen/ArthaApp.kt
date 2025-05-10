@@ -1,15 +1,16 @@
-// ui/ArthaApp.kt
 package com.example.artha.ui.screen
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,62 +22,87 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.artha.model.HistoryItemData
 import com.example.artha.model.PocketData
 import com.example.artha.ocr.runOCR
+import com.example.artha.ocr.runOCRSuspend
 import com.example.artha.ocr.sendToLLM
+import com.example.artha.ocr.sendToLLMSuspend
+import com.example.artha.util.LocalStorageManager
+import com.example.artha.util.getCurrentDateString
+import com.example.artha.util.getCurrentTimeString
 import com.example.artha.util.normalizeAmountFormat
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
+data class ParsedTransaction(
+    val title: String,
+    val amount: Int,
+    val category: String
+)
+
+@SuppressLint("RememberReturnType")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ArthaApp(sharedImageUri: Uri?) {
+fun ArthaApp(
+    sharedImageUri: Uri?,
+    onDone: () -> Unit
+){
     val context = LocalContext.current
     var parsedResult by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var parsedTransaction by remember { mutableStateOf<ParsedTransaction?>(null) }
 
     var pocketList by remember {
-        mutableStateOf(
-            listOf(
-                PocketData("Jajan Harian", 120_000, Color(0xFFD1E8FF), 30),
-            )
-        )
+        mutableStateOf(listOf<PocketData>())
     }
-    var historyList by remember { mutableStateOf(listOf<HistoryItemData>()) }
 
     val screenHeight = context.resources.displayMetrics.heightPixels
     val formOffsetDp = with(LocalDensity.current) { (screenHeight * 0.6f).toDp() }
+    val coroutineScope = rememberCoroutineScope()
+    val historyList = remember { mutableStateListOf<HistoryItemData>() }
+
+    LaunchedEffect("first") {
+        try {
+            pocketList = LocalStorageManager.loadPockets(context)
+            Log.d("ArthaDebug", "✅ Loaded Pockets: $pocketList")
+        } catch (e: Exception) {
+            Log.e("ArthaDebug", "❌ Error loading pockets: ${e.message}")
+            pocketList = emptyList()
+        }
+    }
 
     LaunchedEffect(sharedImageUri) {
         sharedImageUri?.let { uri ->
             isLoading = true
-            runOCR(context, uri) { text ->
-                val cleanedText = normalizeAmountFormat(text)
-                sendToLLM(cleanedText) { result ->
-                    parsedResult = result
-                    isLoading = false
 
-                    try {
-                        val parsed = JSONObject(result).getString("text")
-                        val obj = JSONObject(parsed.replace("```json", "").replace("```", ""))
-                        val newAmount = obj.getString("amount").replace(Regex("[^\\d]"), "").toIntOrNull() ?: 0
-                        val newTitle = obj.optString("bank", "Tidak Diketahui")
-                        val newDate = obj.optString("date", "-")
+            val rawText = runOCRSuspend(context, uri)
+            val cleanedText = normalizeAmountFormat(rawText)
+            val apiKey = LocalStorageManager.loadApiKey(context)
+            val result = sendToLLMSuspend(apiKey, cleanedText)
 
-                        historyList = historyList + HistoryItemData(
-                            title = newTitle,
-                            amount = newAmount,
-                            time = "-",
-                            date = newDate
-                        )
+            parsedResult = result
+            isLoading = false
+        }
+    }
 
-                        pocketList = pocketList.toMutableList().apply {
-                            val first = firstOrNull()
-                            if (first != null) {
-                                val updated = first.copy(amount = first.amount + newAmount)
-                                this[0] = updated
-                            }
-                        }
-                    } catch (_: Exception) {}
-                }
+
+    LaunchedEffect(parsedResult) {
+        try {
+            if (parsedResult.isNotBlank()) {
+                val outer = JSONObject(parsedResult)
+                val innerText = outer.getString("text")
+                val cleaned = innerText.replace(Regex("```json\\s*|```"), "").trim()
+                val json = JSONObject(cleaned)
+
+                parsedTransaction = ParsedTransaction(
+                    title = json.getString("bank"),
+                    amount = json.getString("amount").replace(Regex("[^\\d]"), "").toIntOrNull() ?: 0,
+                    category = json.optString("category")
+                )
+
+                Log.d("ArthaDebug", "✅ ParsedTransaction: $parsedTransaction")
             }
+        } catch (e: Exception) {
+            Log.e("ArthaDebug", "❌ Parsing error: ${e.message}")
+            parsedTransaction = null
         }
     }
 
@@ -108,11 +134,46 @@ fun ArthaApp(sharedImageUri: Uri?) {
             Column(modifier = Modifier.padding(24.dp)) {
                 ResultScreen(parsedJson = parsedResult, isLoading = isLoading)
                 Spacer(modifier = Modifier.height(30.dp))
-                BudgetCard(
-                    title = pocketList.firstOrNull()?.title ?: "Bulanan",
-                    spent = pocketList.firstOrNull()?.amount ?: 0,
-                    total = 5_000_000
-                )
+                if (pocketList.isNotEmpty()) {
+                    BudgetCard(
+                        categoryOptions = pocketList,
+                        title = parsedTransaction?.title.orEmpty(),
+                        spent = parsedTransaction?.amount ?: 0,
+                        category = parsedTransaction?.category.orEmpty(),
+                        onSubmit = { selectedPocket, transactionTitle, amount ->
+                            val updatedPockets = pocketList.map {
+                                if (it.title == selectedPocket) {
+                                    it.copy(amount = it.amount + amount)
+                                } else it
+                            }
+                            val newHistory = HistoryItemData(
+                                title = transactionTitle,
+                                amount = amount,
+                                time = getCurrentTimeString(),
+                                date = getCurrentDateString(),
+                                pocket = selectedPocket,
+                            )
+
+                            pocketList = updatedPockets
+                            historyList.add(0, newHistory) // prepend ke UI list
+
+                            coroutineScope.launch {
+                                try {
+                                    LocalStorageManager.savePockets(context, updatedPockets)
+                                    LocalStorageManager.appendHistory(context, newHistory)
+
+                                    val reloadedHistory = LocalStorageManager.loadHistory(context)
+                                    Log.d("ArthaDebug", "✅ Saved & Reloaded History: $reloadedHistory")
+                                    onDone()
+                                } catch (e: Exception) {
+                                    Log.e("ArthaDebug", "❌ Failed saving data: ${e.message}")
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    Text("Sedang memuat data saku...", color = Color.Gray)
+                }
             }
         }
     }

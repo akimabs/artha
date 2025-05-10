@@ -21,21 +21,30 @@ import com.example.artha.R
 fun PocketCard(
     title: String,
     amount: Int,
-    percentage: Int,
+    targetAmount: Int,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
     isHighlighted: Boolean = false
 ) {
-    // 1. Animasi ringan pakai tween
     val scale by animateFloatAsState(
         targetValue = if (isHighlighted) 1.05f else 1f,
         animationSpec = tween(durationMillis = 300),
         label = "highlightScale"
     )
 
-    // 2. Cache ikon & format string
     val walletIcon = painterResource(id = R.drawable.wallet)
     val formattedAmount = remember(amount) { "Rp%,d".format(amount) }
+
+    val percentage = if (targetAmount != 0) {
+        (amount * 100) / targetAmount
+    } else {
+        0
+    }
+
+    val isOverBudget = percentage > 100
+    val progressColor = if (isOverBudget) Color.Red else Color(0xFF4CAF50)
+    val percentTextColor = if (isOverBudget) Color.Red else Color.Black
+    val progress = percentage.coerceIn(0, 100) / 100f
 
     Card(
         modifier = modifier
@@ -69,15 +78,28 @@ fun PocketCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     LinearProgressIndicator(
-                        progress = percentage / 100f,
+                        progress = progress,
                         modifier = Modifier
                             .weight(1f)
                             .height(8.dp)
                             .clip(RoundedCornerShape(50)),
-                        color = Color(0xFF4CAF50),
+                        color = progressColor,
                         trackColor = Color.LightGray
                     )
-                    Text("$percentage%", style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        "$percentage%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = percentTextColor
+                    )
+                }
+
+                if (isOverBudget) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "Overbudget!",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

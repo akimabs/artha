@@ -1,25 +1,3 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
-
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
 # Keep Jetpack Compose
 -keep class androidx.compose.** { *; }
 -dontwarn androidx.compose.**
@@ -31,5 +9,31 @@
 # Coil
 -keep class coil.** { *; }
 
-# OkHttp
+# OkHttp (hindari warning)
 -dontwarn okhttp3.**
+
+# Gson - Keep type signatures and annotations
+-keepattributes Signature, RuntimeVisibleAnnotations
+
+# Keep Gson TypeToken
+-keep class com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Keep models used by Gson (prevent crash on release build)
+-keep class com.example.artha.model.PocketData { *; }
+-keep class com.example.artha.model.HistoryItemData { *; }
+
+# (Optional) If using @SerializedName
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keepclassmembers class com.example.artha.model.* {
+    <fields>;
+    <init>();
+}
+
+-keepclassmembers class com.example.artha.util.LocalStorageManager {
+    public static *** loadHistory(android.content.Context);
+    public static *** saveHistory(android.content.Context, java.util.List);
+}
+-keepclassmembers class com.example.artha.model.HistoryItemData { *; }

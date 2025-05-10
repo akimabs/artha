@@ -1,5 +1,6 @@
 package com.example.artha.ocr
 
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -48,6 +49,51 @@ fun sendToLLM(text: String, onResult: (String) -> Unit) {
 
         override fun onFailure(call: Call, e: IOException) {
             onResult("{\"text\":\"{\\\"error\\\":\\\"${e.message}\\\"}\"}")
+        }
+    })
+}
+
+// ocr/sendToLLM.kt
+suspend fun sendToLLMSuspend(apiKey: String, text: String): String = suspendCancellableCoroutine { cont ->
+    val client = OkHttpClient()
+
+    val prompt = """
+        Dari teks berikut, ekstrak:
+        - amount (jumlah uang dalam angka penuh),
+        - date (tanggal transaksi),
+        - bank (nama bank),
+        - category (jenis transaksi).
+        
+        Teks:\n$text
+
+        Jawab dalam format JSON dengan kunci: amount, date, bank, category.
+    """.trimIndent()
+
+    val json = """{"contents":[{"parts":[{"text":"$prompt"}]}]}"""
+    val request = Request.Builder()
+        .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-thinking-exp-01-21:generateContent?key=$apiKey")
+        .post(json.toRequestBody("application/json".toMediaType()))
+        .build()
+
+    client.newCall(request).enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            cont.resume("{\"text\":\"{\\\"error\\\":\\\"${e.message}\\\"}\"}", onCancellation = null)
+        }
+
+        override fun onResponse(call: Call, response: Response) {
+            val body = response.body?.string() ?: return cont.resume("{\"text\":\"Empty response\"}", onCancellation = null)
+            try {
+                val parsed = JSONObject(body)
+                    .getJSONArray("candidates")
+                    .getJSONObject(0)
+                    .getJSONObject("content")
+                    .getJSONArray("parts")
+                    .getJSONObject(0)
+                    .getString("text")
+                cont.resume(JSONObject().put("text", parsed).toString(), onCancellation = null)
+            } catch (e: Exception) {
+                cont.resume("{\"text\":\"{\\\"error\\\":\\\"Parsing failed\\\"}\"}", onCancellation = null)
+            }
         }
     })
 }

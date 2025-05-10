@@ -1,4 +1,3 @@
-// ui/AddPocketBottomSheet.kt
 package com.example.artha.ui.screen
 
 import androidx.compose.foundation.background
@@ -21,11 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.artha.model.PocketData
+import com.example.artha.util.extractDigitsOnly
 
 @Composable
 fun AddPocketBottomSheet(
-    selectedColor: Color,
-    onColorChange: (Color) -> Unit,
+    selectedColor: Int,
+    onColorChange: (Int) -> Unit,
     onDismiss: () -> Unit,
     onAddPocket: (PocketData) -> Unit
 ) {
@@ -86,25 +86,25 @@ fun AddPocketBottomSheet(
                 modifier = Modifier.padding(vertical = 12.dp)
             ) {
                 listOf(
-                    Color(0xFFFFFFCC), Color(0xFFCFFFE0),
-                    Color(0xFFD1E8FF), Color(0xFFFFD1DC),
-                    Color(0xFFE2ECEB), Color(0xFFE0F7FA)
-                ).forEach { color ->
+                    0xFFFFFFCC.toInt(), 0xFFCFFFE0.toInt(),
+                    0xFFD1E8FF.toInt(), 0xFFFFD1DC.toInt(),
+                    0xFFE2ECEB.toInt(), 0xFFE0F7FA.toInt()
+                ).forEach { colorInt ->
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(color)
+                            .background(Color(colorInt))
                             .border(
                                 2.dp,
-                                if (selectedColor == color) Color(0xFF5AB0F6) else Color.Transparent,
+                                if (selectedColor == colorInt) Color(0xFF5AB0F6) else Color.Transparent,
                                 CircleShape
                             )
                             .clickable(
                                 indication = rememberRipple(bounded = true, radius = 20.dp),
                                 interactionSource = remember { MutableInteractionSource() }
                             ) {
-                                onColorChange(color)
+                                onColorChange(colorInt)
                             }
                     )
                 }
@@ -118,7 +118,7 @@ fun AddPocketBottomSheet(
                     .fillMaxWidth()
                     .height(60.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(backgroundColor) // <- ini yang ngasih warna
+                    .background(backgroundColor)
                     .clickable(
                         enabled = isFormValid,
                         interactionSource = remember { MutableInteractionSource() },
@@ -127,8 +127,8 @@ fun AddPocketBottomSheet(
                             val pocket = PocketData(
                                 title = title.text,
                                 amount = 0,
-                                backgroundColor = selectedColor,
-                                percentage = 0
+                                backgroundColorInt = selectedColor,
+                                targetAmount = extractDigitsOnly(target.text)
                             )
                             onAddPocket(pocket)
                             onDismiss()

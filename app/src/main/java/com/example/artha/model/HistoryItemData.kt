@@ -4,5 +4,6 @@ data class HistoryItemData(
     val title: String,
     val amount: Int,
     val time: String,
-    val date: String
+    val date: String,
+    val pocket: String,
 )
