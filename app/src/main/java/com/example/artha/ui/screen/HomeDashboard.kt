@@ -24,26 +24,12 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeDashboard() {
-    var pocketList by remember {
-        mutableStateOf(
-            listOf(
-                PocketData("Jajan Harian", 120_000, Color(0xFFD1E8FF), 30),
-                PocketData("Transport", 300_000, Color(0xFFFFD1DC), 60),
-                PocketData("Kopi", 50_000, Color(0xFFCFFFE0), 10)
-            )
+    var pocketList by remember { mutableStateOf(emptyList<PocketData>()) }
+    val historyList = remember {
+        mutableStateListOf<HistoryItemData>(
+            HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
         )
     }
-
-    val historyList = listOf(
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
-        HistoryItemData("Nasi Goreng", 25000, "12:45", "10 Mei 2025"),
-        HistoryItemData("Starbucks", 42000, "16:20", "09 Mei 2025")
-    )
 
     val totalPengeluaran = pocketList.sumOf { it.amount }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -120,15 +106,17 @@ fun HomeDashboard() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Saku Kamu", style = MaterialTheme.typography.titleLarge)
-                    Text(
-                        "+ Tambah Saku",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = Color(0xFF0D8CF2),
-                        modifier = Modifier.clickable { showBottomSheet = true }
-                    )
+                    if(!pocketList.isEmpty()){
+                        Text(
+                            "+ Tambah Saku",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color(0xFF0D8CF2),
+                            modifier = Modifier.clickable { showBottomSheet = true }
+                        )
+                    }
                 }
             }
 

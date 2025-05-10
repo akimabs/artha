@@ -32,7 +32,6 @@ fun AddPocketBottomSheet(
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var target by remember { mutableStateOf(TextFieldValue("")) }
     val isFormValid = title.text.isNotBlank() && target.text.contains(Regex("\\d"))
-    val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
