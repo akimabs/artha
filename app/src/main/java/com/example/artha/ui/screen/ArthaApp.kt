@@ -2,6 +2,8 @@
 package com.example.artha.ui.screen
 
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +24,7 @@ import com.example.artha.ocr.sendToLLM
 import com.example.artha.util.normalizeAmountFormat
 import org.json.JSONObject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ArthaApp(sharedImageUri: Uri?) {
     val context = LocalContext.current

@@ -34,12 +34,16 @@ fun HomeDashboard() {
 
     val historyList = listOf(
         HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
+        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
+        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
+        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
+        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
+        HistoryItemData("Grab Bike", 15000, "08:30", "10 Mei 2025"),
         HistoryItemData("Nasi Goreng", 25000, "12:45", "10 Mei 2025"),
         HistoryItemData("Starbucks", 42000, "16:20", "09 Mei 2025")
     )
 
     val totalPengeluaran = pocketList.sumOf { it.amount }
-    val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf(Color(0xFFFFF8DC)) }
@@ -176,6 +180,7 @@ fun HomeDashboard() {
                                 date = it.date
                             )
                         }
+                        Spacer(modifier = Modifier.height(30.dp))
                     }
                 }
             }

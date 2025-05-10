@@ -48,7 +48,7 @@ fun ResultScreen(parsedJson: String, isLoading: Boolean) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("IDR", style = MaterialTheme.typography.titleMedium)
+            Text("Indonesia Rupiah", style = MaterialTheme.typography.titleMedium)
             Text("%,d".format(displayAmount), style = MaterialTheme.typography.displayLarge)
         }
 
