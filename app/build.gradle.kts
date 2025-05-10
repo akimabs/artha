@@ -75,6 +75,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.valentinilk.shimmer:compose-shimmer:1.0.5")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
