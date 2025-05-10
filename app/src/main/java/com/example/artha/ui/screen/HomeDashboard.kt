@@ -26,12 +26,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.util.fastFirstOrNull
 
 
 @Composable
-fun FilterBadge(label: String, selected: Boolean, onClick: () -> Unit) {
+fun FilterBadge(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(if (selected) Color(0xFF0D8CF2) else Color(0xFFE0E0E0))
             .clickable { onClick() }
@@ -256,23 +262,33 @@ fun HomeDashboard() {
             Spacer(modifier = Modifier.height(30.dp))
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text("Riwayat Pengeluaran", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(20.dp))
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item {
-                        FilterBadge(
-                            label = "Semua",
-                            selected = selectedPocket == null,
-                            onClick = { selectedPocket = null }
-                        )
-                    }
-                    items(pocketList) { pocket ->
-                        FilterBadge(
-                            label = pocket.title,
-                            selected = selectedPocket == pocket.title,
-                            onClick = { selectedPocket = pocket.title }
-                        )
-                    }
+            }
+            LazyRow {
+                item {
+                    FilterBadge(
+                        label = "Semua",
+                        selected = selectedPocket == null,
+                        onClick = { selectedPocket = null },
+                        modifier = Modifier.padding(start = 20.dp, top = 20.dp)
+                    )
                 }
+                itemsIndexed(pocketList) { index, pocket ->
+                    val isFirst = index == 0
+                    val isLast = index == pocketList.lastIndex
+
+                    FilterBadge(
+                        label = pocket.title,
+                        selected = selectedPocket == pocket.title,
+                        onClick = { selectedPocket = pocket.title },
+                        modifier = Modifier.padding(
+                            start = if (isFirst) 5.dp else 10.dp,
+                            end = if (isLast) 5.dp else 0.dp,
+                            top = 20.dp
+                        )
+                    )
+                }
+            }
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(modifier = Modifier.height(16.dp))
                 if (historyList.isEmpty()) {
                     Box(
