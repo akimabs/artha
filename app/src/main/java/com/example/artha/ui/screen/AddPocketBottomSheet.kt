@@ -43,11 +43,15 @@ fun AddPocketBottomSheet(
                 onValueChange = { title = it },
                 shape = RoundedCornerShape(10.dp),
                 singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedLabelColor = Color(0xFF5AB0F6),
+                    focusedBorderColor = Color(0xFF5AB0F6),
+                ),
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
             )
 
             OutlinedTextField(
-                label = { Text("Target Keuangan") },
+                label = { Text("Jumlah Target") },
                 value = target,
                 onValueChange = { newValue ->
                     val digitsOnly = newValue.text.replace(Regex("[^\\d]"), "")
@@ -62,6 +66,10 @@ fun AddPocketBottomSheet(
                 shape = RoundedCornerShape(10.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedLabelColor = Color(0xFF5AB0F6),
+                    focusedBorderColor = Color(0xFF5AB0F6),
+                ),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
 
@@ -93,6 +101,7 @@ fun AddPocketBottomSheet(
                         percentage = 0
                     )
                     onAddPocket(pocket)
+                    onDismiss()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5AB0F6))
