@@ -4,13 +4,16 @@ package com.example.artha.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -27,6 +30,7 @@ fun AddPocketBottomSheet(
 ) {
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var target by remember { mutableStateOf(TextFieldValue("")) }
+    val isFormValid = title.text.isNotBlank() && target.text.contains(Regex("\\d"))
 
     Surface(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -84,15 +88,26 @@ fun AddPocketBottomSheet(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .background(color, shape = CircleShape)
-                            .border(2.dp, if (selectedColor == color) Color(0xFF5AB0F6) else Color.Transparent, CircleShape)
-                            .clickable { onColorChange(color) }
+                            .clip(CircleShape)
+                            .background(color)
+                            .border(
+                                2.dp,
+                                if (selectedColor == color) Color(0xFF5AB0F6) else Color.Transparent,
+                                CircleShape
+                            )
+                            .clickable(
+                                indication = rememberRipple(bounded = true, radius = 20.dp),
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                onColorChange(color)
+                            }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
             Button(
+                enabled = isFormValid,
                 onClick = {
                     val pocket = PocketData(
                         title = title.text,
