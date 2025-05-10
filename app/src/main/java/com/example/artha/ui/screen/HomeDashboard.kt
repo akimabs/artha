@@ -263,29 +263,31 @@ fun HomeDashboard() {
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text("Riwayat Pengeluaran", style = MaterialTheme.typography.titleLarge)
             }
-            LazyRow {
-                item {
-                    FilterBadge(
-                        label = "Semua",
-                        selected = selectedPocket == null,
-                        onClick = { selectedPocket = null },
-                        modifier = Modifier.padding(start = 20.dp, top = 20.dp)
-                    )
-                }
-                itemsIndexed(pocketList) { index, pocket ->
-                    val isFirst = index == 0
-                    val isLast = index == pocketList.lastIndex
-
-                    FilterBadge(
-                        label = pocket.title,
-                        selected = selectedPocket == pocket.title,
-                        onClick = { selectedPocket = pocket.title },
-                        modifier = Modifier.padding(
-                            start = if (isFirst) 5.dp else 10.dp,
-                            end = if (isLast) 5.dp else 0.dp,
-                            top = 20.dp
+            if(!pocketList.isEmpty()){
+                LazyRow {
+                    item {
+                        FilterBadge(
+                            label = "Semua",
+                            selected = selectedPocket == null,
+                            onClick = { selectedPocket = null },
+                            modifier = Modifier.padding(start = 20.dp, top = 20.dp)
                         )
-                    )
+                    }
+                    itemsIndexed(pocketList) { index, pocket ->
+                        val isFirst = index == 0
+                        val isLast = index == pocketList.lastIndex
+
+                        FilterBadge(
+                            label = pocket.title,
+                            selected = selectedPocket == pocket.title,
+                            onClick = { selectedPocket = pocket.title },
+                            modifier = Modifier.padding(
+                                start = if (isFirst) 5.dp else 10.dp,
+                                end = if (isLast) 5.dp else 10.dp,
+                                top = 20.dp
+                            )
+                        )
+                    }
                 }
             }
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
