@@ -1,6 +1,5 @@
 package com.example.artha.ui.screen
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -64,6 +63,8 @@ fun HomeDashboard() {
     var showApiKeyDialog by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(TextFieldValue("")) }
     var selectedPocket by remember { mutableStateOf<String?>(null) }
+    val apiKeyRegex = Regex("^AIza[0-9A-Za-z_-]{35}$")
+    val isValid = apiKeyRegex.matches(apiKeyInput.text)
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -156,7 +157,7 @@ fun HomeDashboard() {
 
         if (showApiKeyDialog) {
             AlertDialog(
-                onDismissRequest = {}, // Tidak bisa dismiss dengan tap luar
+                onDismissRequest = {},
                 title = { Text("Setel API Key Gemini") },
                 text = {
                     Column {
@@ -177,7 +178,7 @@ fun HomeDashboard() {
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (apiKeyInput.text.isNotEmpty()) {
+                        if (isValid) {
                             coroutineScope.launch {
                                 LocalStorageManager.saveApiKey(context, apiKeyInput.text)
                                 showApiKeyDialog = false
