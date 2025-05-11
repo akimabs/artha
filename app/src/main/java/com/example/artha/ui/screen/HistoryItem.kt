@@ -41,7 +41,7 @@ fun HistoryItem(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                    Text(title, style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                Text(title, style = MaterialTheme.typography.bodyLarge, color = Color.White)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
