@@ -78,13 +78,12 @@ fun HomeDashboard() {
     LaunchedEffect(Unit) {
         pocketList = LocalStorageManager.loadPockets(context)
         historyList.addAll(LocalStorageManager.loadHistory(context))
-        var storedApiKey = LocalStorageManager.loadApiKey(context)
-        apiKeyInput = TextFieldValue(storedApiKey)
-
-        if (storedApiKey.isBlank()) {
-            showApiKeyDialog = true
-        }
-
+//        var storedApiKey = LocalStorageManager.loadApiKey(context)
+//        apiKeyInput = TextFieldValue(storedApiKey)
+//
+//        if (storedApiKey.isBlank()) {
+//            showApiKeyDialog = true
+//        }
         Log.d("ArthaDebug", "History Loaded: ${historyList.joinToString("\n")}")
     }
 
@@ -144,14 +143,14 @@ fun HomeDashboard() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Pengeluaran Bulan Ini", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan API",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable { showApiKeyDialog = true }
-                    )
+//                    Icon(
+//                        imageVector = Icons.Default.Settings,
+//                        contentDescription = "Pengaturan API",
+//                        tint = Color.Gray,
+//                        modifier = Modifier
+//                            .size(18.dp)
+//                            .clickable { showApiKeyDialog = true }
+//                    )
                 }
                 Text(
                     text = "Rp%,d".format(totalPengeluaran),
@@ -253,7 +252,14 @@ fun HomeDashboard() {
                             isHighlighted = index == highlightedIndex,
                             modifier = Modifier
                                 .padding(start = startPadding, end = endPadding)
-                                .width(200.dp)
+                                .width(200.dp),
+                            onDelete = {
+                                coroutineScope.launch {
+                                    LocalStorageManager.deletePocket(context, pocket)
+                                    pocketList = LocalStorageManager.loadPockets(context)
+                                    historyList.removeAll { it.pocketId == pocket.id } // ⬅️ ini penting
+                                }
+                            }
                         )
                     }
                 }
@@ -263,33 +269,34 @@ fun HomeDashboard() {
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Text("Riwayat Pengeluaran", style = MaterialTheme.typography.titleLarge)
             }
-            if(!pocketList.isEmpty()){
+            if (pocketList.isNotEmpty()) {
                 LazyRow {
                     item {
                         FilterBadge(
                             label = "Semua",
                             selected = selectedPocket == null,
                             onClick = { selectedPocket = null },
-                            modifier = Modifier.padding(start = 20.dp, top = 20.dp)
+                            modifier = Modifier.padding(start = 20.dp, end = 0.dp, top = 15.dp)
                         )
                     }
                     itemsIndexed(pocketList) { index, pocket ->
-                        val isFirst = index == 0
-                        val isLast = index == pocketList.lastIndex
+                        val startPadding = 10.dp
+                        val endPadding = if (index == pocketList.lastIndex) 20.dp else 0.dp
 
                         FilterBadge(
                             label = pocket.title,
-                            selected = selectedPocket == pocket.title,
-                            onClick = { selectedPocket = pocket.title },
+                            selected = selectedPocket == pocket.id,
+                            onClick = { selectedPocket = pocket.id },
                             modifier = Modifier.padding(
-                                start = if (isFirst) 5.dp else 10.dp,
-                                end = if (isLast) 5.dp else 10.dp,
-                                top = 20.dp
+                                start = startPadding,
+                                end = endPadding,
+                                top = 15.dp
                             )
                         )
                     }
                 }
             }
+
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 Spacer(modifier = Modifier.height(16.dp))
                 if (historyList.isEmpty()) {
@@ -306,7 +313,7 @@ fun HomeDashboard() {
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         val filteredHistory = if (selectedPocket != null) {
-                            historyList.filter { it.pocket == selectedPocket }
+                            historyList.filter { it.pocketId == selectedPocket }
                         } else {
                             historyList
                         }
@@ -316,7 +323,14 @@ fun HomeDashboard() {
                                 title = it.title,
                                 amount = it.amount,
                                 time = it.time,
-                                date = it.date
+                                date = it.date,
+                                onDelete = {
+                                    coroutineScope.launch {
+                                        LocalStorageManager.deleteHistoryItem(context, it)
+                                        historyList.removeIf { h -> h.id == it.id }
+                                        pocketList = LocalStorageManager.loadPockets(context)
+                                    }
+                                }
                             )
                         }
                         Spacer(modifier = Modifier.height(30.dp))

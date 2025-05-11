@@ -2,8 +2,11 @@ package com.example.artha.ui.screen
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +27,8 @@ fun PocketCard(
     targetAmount: Int,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
-    isHighlighted: Boolean = false
+    isHighlighted: Boolean = false,
+    onDelete: (() -> Unit)
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isHighlighted) 1.05f else 1f,
@@ -33,6 +37,7 @@ fun PocketCard(
     )
 
     val walletIcon = painterResource(id = R.drawable.wallet)
+    val deleteWalletIcon = painterResource(id = R.drawable.delete_pocket)
     val formattedAmount = remember(amount) { "Rp%,d".format(amount) }
 
     val percentage = if (targetAmount != 0) {
@@ -54,52 +59,74 @@ fun PocketCard(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Icon(
-                    painter = walletIcon,
-                    contentDescription = "Icon Dompet",
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(title, style = MaterialTheme.typography.titleMedium)
-            }
-
-            Column {
-                if (isOverBudget) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        "Overbudget!",
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (onDelete != null) {
+                IconButton(
+                    onClick = { onDelete() },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.Black.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        painter = deleteWalletIcon,
+                        contentDescription = "Hapus Pocket",
+                        tint = Color.DarkGray,
+                        modifier = Modifier.size(25.dp)
                     )
                 }
-                Text(formattedAmount, style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    LinearProgressIndicator(
-                        progress = progress,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(50)),
-                        color = progressColor,
-                        trackColor = Color.LightGray
+            }
+
+            // Isi kartu seperti biasa
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Icon(
+                        painter = walletIcon,
+                        contentDescription = "Icon Dompet",
+                        tint = Color.Black
                     )
-                    Text(
-                        "$formattedPercentage%",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = percentTextColor
-                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                }
+
+                Column {
+                    if (isOverBudget) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Overbudget!",
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Text(formattedAmount, style = MaterialTheme.typography.headlineSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(50)),
+                            color = progressColor,
+                            trackColor = Color.LightGray
+                        )
+                        Text(
+                            "$formattedPercentage%",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = percentTextColor
+                        )
+                    }
                 }
             }
         }

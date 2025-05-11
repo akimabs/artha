@@ -26,7 +26,7 @@ object LocalStorageManager {
 
     suspend fun loadApiKey(context: Context): String {
         val prefs = context.dataStore.data.first()
-        return prefs[API_KEY] ?: ""
+        return prefs[API_KEY] ?: "AIzaSyADjYM8vPmbOEVKuXLq_TomsPii5W7OY1c"
     }
 
     suspend fun savePockets(context: Context, pockets: List<PocketData>) {
@@ -57,5 +57,24 @@ object LocalStorageManager {
         val json = prefs[HISTORY_LIST_KEY] ?: return emptyList()
         val type = object : TypeToken<List<HistoryItemData>>() {}.type
         return gson.fromJson(json, type)
+    }
+
+    suspend fun deleteHistoryItem(context: Context, item: HistoryItemData) {
+        val updatedHistory = loadHistory(context).filterNot { it.id == item.id }
+        saveHistory(context, updatedHistory)
+
+        // Update pocket balance
+        val updatedPockets = loadPockets(context).map {
+            if (it.id == item.pocketId) it.copy(amount = it.amount - item.amount) else it
+        }
+        savePockets(context, updatedPockets)
+    }
+
+    suspend fun deletePocket(context: Context, pocket: PocketData) {
+        val updatedPockets = loadPockets(context).filterNot { it.id == pocket.id }
+        savePockets(context, updatedPockets)
+
+        val updatedHistory = loadHistory(context).filterNot { it.pocketId == pocket.id }
+        saveHistory(context, updatedHistory)
     }
 }

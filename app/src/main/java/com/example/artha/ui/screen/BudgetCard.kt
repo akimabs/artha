@@ -30,10 +30,11 @@ fun BudgetCard(
     onSubmit: (selectedPocket: String, title: String, amount: Int) -> Unit
 ) {
     var animateNow by remember { mutableStateOf(false) }
-    var selectedPocket by remember { mutableStateOf(category) }
+    var selectedPocketTitle by remember { mutableStateOf("") }
     var budgetTarget by remember { mutableStateOf(0) }
     var budgetCurrent by remember { mutableStateOf(0) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedPocketId by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val totalBudgetAfterSpend = budgetCurrent + spent
@@ -66,7 +67,8 @@ fun BudgetCard(
     LaunchedEffect(categoryOptions) {
         if (categoryOptions.isNotEmpty()) {
             val first = categoryOptions.first()
-            selectedPocket = first.title
+            selectedPocketTitle = first.title
+            selectedPocketId = first.id
             budgetTarget = first.targetAmount
             budgetCurrent = first.amount
         }
@@ -88,9 +90,10 @@ fun BudgetCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            selectedPocket = response.title
+                            selectedPocketTitle = response.title
                             budgetTarget = response.targetAmount
                             budgetCurrent = response.amount
+                            selectedPocketId = response.id
                             showBottomSheet = false
                         },
                     headlineContent = {
@@ -165,7 +168,7 @@ fun BudgetCard(
                 ) {
                     Row {
                         Text(
-                            text = selectedPocket,
+                            text = selectedPocketTitle,
                             color = Color.Black,
                             style = MaterialTheme.typography.titleMedium
                         )
@@ -204,7 +207,7 @@ fun BudgetCard(
                     .background(submitColor)
                     .clickable {
                         if (submitEnabled) {
-                            onSubmit(selectedPocket, title, spent)
+                            onSubmit(selectedPocketId, title, spent)
                         }
                     },
                 contentAlignment = Alignment.Center

@@ -26,11 +26,14 @@ import com.example.artha.ocr.runOCRSuspend
 import com.example.artha.ocr.sendToLLM
 import com.example.artha.ocr.sendToLLMSuspend
 import com.example.artha.util.LocalStorageManager
+import com.example.artha.util.RateLimiter
 import com.example.artha.util.getCurrentDateString
 import com.example.artha.util.getCurrentTimeString
 import com.example.artha.util.normalizeAmountFormat
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
+import java.util.UUID
 
 data class ParsedTransaction(
     val title: String,
@@ -58,6 +61,7 @@ fun ArthaApp(
     val formOffsetDp = with(LocalDensity.current) { (screenHeight * 0.6f).toDp() }
     val coroutineScope = rememberCoroutineScope()
     val historyList = remember { mutableStateListOf<HistoryItemData>() }
+    val llmRateLimiter = RateLimiter(10000L) // Maks 1 request / 10 detik
 
     LaunchedEffect("first") {
         try {
@@ -75,11 +79,13 @@ fun ArthaApp(
 
             val rawText = runOCRSuspend(context, uri)
             val cleanedText = normalizeAmountFormat(rawText)
-            val apiKey = LocalStorageManager.loadApiKey(context)
-            val result = sendToLLMSuspend(apiKey, cleanedText)
+            llmRateLimiter.run {
+                val apiKey = LocalStorageManager.loadApiKey(context)
+                val result = sendToLLMSuspend(apiKey, cleanedText)
 
-            parsedResult = result
-            isLoading = false
+                parsedResult = result
+                isLoading = false
+            }
         }
     }
 
@@ -140,9 +146,9 @@ fun ArthaApp(
                         title = parsedTransaction?.title.orEmpty(),
                         spent = parsedTransaction?.amount ?: 0,
                         category = parsedTransaction?.category.orEmpty(),
-                        onSubmit = { selectedPocket, transactionTitle, amount ->
+                        onSubmit = { selectedPocketId, transactionTitle, amount ->
                             val updatedPockets = pocketList.map {
-                                if (it.title == selectedPocket) {
+                                if (it.id == selectedPocketId) {
                                     it.copy(amount = it.amount + amount)
                                 } else it
                             }
@@ -151,7 +157,7 @@ fun ArthaApp(
                                 amount = amount,
                                 time = getCurrentTimeString(),
                                 date = getCurrentDateString(),
-                                pocket = selectedPocket,
+                                pocketId = selectedPocketId,
                             )
 
                             pocketList = updatedPockets

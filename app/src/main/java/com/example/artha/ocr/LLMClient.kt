@@ -1,5 +1,6 @@
 package com.example.artha.ocr
 
+import com.example.artha.util.RateLimiter
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import org.json.JSONObject
