@@ -324,6 +324,7 @@ fun HomeDashboard() {
                                 amount = it.amount,
                                 time = it.time,
                                 date = it.date,
+                                pocketName = pocketList.fastFirstOrNull { p -> p.id == it.pocketId }?.title ?: "-",
                                 onDelete = {
                                     coroutineScope.launch {
                                         LocalStorageManager.deleteHistoryItem(context, it)

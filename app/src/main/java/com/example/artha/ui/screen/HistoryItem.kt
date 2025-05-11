@@ -19,6 +19,7 @@ import com.example.artha.R
 @Composable
 fun HistoryItem(
     title: String,
+    pocketName: String,
     amount: Int,
     time: String,
     date: String,
@@ -40,8 +41,14 @@ fun HistoryItem(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = Color.White)
-                Text(time, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(title, style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(time, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                    Text(" • ", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                    Text(pocketName, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                }
             }
 
             Column(
