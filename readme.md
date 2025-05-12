@@ -1,6 +1,6 @@
 # 🎯 Artha
 
-A lightweight offline budgeting app powered by OCR and LLM.  
+A lightweight budgeting app powered by OCR and LLM.  
 Scan your receipts, extract expenses instantly, and track monthly spending per category.
 
 <p align="center">
