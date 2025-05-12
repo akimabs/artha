@@ -3,6 +3,13 @@
 A lightweight offline budgeting app powered by OCR and LLM.  
 Scan your receipts, extract expenses instantly, and track monthly spending per category.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/01.jpeg" width="200"/>
+  <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/02.jpeg" width="200"/>
+  <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/03.jpeg" width="200"/>
+  <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/04.jpeg" width="200"/>
+</p>
+
 ---
 
 ## ✨ Features
