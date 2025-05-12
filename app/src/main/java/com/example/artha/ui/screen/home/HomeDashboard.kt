@@ -1,5 +1,8 @@
 package com.example.artha.ui.screen.home
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -202,10 +205,10 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
 
         if (showApiKeyDialog) {
             AlertDialog(
-                onDismissRequest = {},
+                onDismissRequest = { showApiKeyDialog = false },
                 title = { Text("Setel API Key Gemini") },
                 text = {
-                    Column {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Text("Masukkan API Key kamu di bawah ini.")
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
@@ -219,20 +222,57 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                             singleLine = true,
                             label = { Text("API Key") }
                         )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Belum punya API Key?",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "Buat sekarang",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF5AB0F6),
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.clickable {
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://makersuite.google.com/app/apikey")
+                                    )
+                                    context.startActivity(intent)
+                                }
+                            )
+                        }
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (isValid) {
+                        if (apiKeyInput.text.isNotBlank()) {
                             coroutineScope.launch {
                                 LocalStorageManager.saveApiKey(context, apiKeyInput.text)
                                 showApiKeyDialog = false
                             }
                         }
                     }) {
-                        Text("Simpan")
+                        Text("Simpan", color = Color.Black)
                     }
                 },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showApiKeyDialog = false
+                            coroutineScope.launch {
+                                delay(350)
+                                (context as? Activity)?.finish()
+                            }
+                        }
+                    ) {
+                        Text("Batal", color = Color.Gray)
+                    }
+                }
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
