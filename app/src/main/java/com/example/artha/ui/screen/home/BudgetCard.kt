@@ -1,4 +1,4 @@
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.example.artha.model.PocketData
 
@@ -25,7 +26,7 @@ fun BudgetCard(
     categoryOptions: List<PocketData>,
     title: String,
     spent: Int,
-    category: String,
+    monthlyBalanceMap: Map<String, Int>,
     modifier: Modifier = Modifier,
     onSubmit: (selectedPocket: String, title: String, amount: Int) -> Unit
 ) {
@@ -70,7 +71,7 @@ fun BudgetCard(
             selectedPocketTitle = first.title
             selectedPocketId = first.id
             budgetTarget = first.targetAmount
-            budgetCurrent = first.amount
+            budgetCurrent = monthlyBalanceMap[first.id] ?: 0
         }
     }
 
@@ -92,7 +93,7 @@ fun BudgetCard(
                         .clickable {
                             selectedPocketTitle = response.title
                             budgetTarget = response.targetAmount
-                            budgetCurrent = response.amount
+                            budgetCurrent = monthlyBalanceMap[response.id] ?: 0
                             selectedPocketId = response.id
                             showBottomSheet = false
                         },
@@ -143,8 +144,11 @@ fun BudgetCard(
                         .matchParentSize()
                         .clip(RoundedCornerShape(16.dp))
                 ) {
-                    val fullWidth = constraints.maxWidth.toFloat()
-                    val animatedWidth = (animatedProgress.coerceIn(0f, 1f) * fullWidth).dp
+                    val density = LocalDensity.current
+                    val fullWidthPx = constraints.maxWidth.toFloat()
+                    val animatedWidthPx = animatedProgress.coerceIn(0f, 1f) * fullWidthPx
+
+                    val animatedWidthDp = with(density) { animatedWidthPx.toDp() }
 
                     Box(
                         modifier = Modifier
@@ -154,7 +158,7 @@ fun BudgetCard(
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .width(animatedWidth)
+                            .width(animatedWidthDp)
                             .background(progressColor.copy(alpha = 0.35f))
                             .clip(RoundedCornerShape(16.dp))
                     )

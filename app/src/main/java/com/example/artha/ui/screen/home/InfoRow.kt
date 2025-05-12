@@ -1,5 +1,5 @@
 // ui/InfoRow.kt
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

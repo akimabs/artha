@@ -1,4 +1,4 @@
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import android.annotation.SuppressLint
 import android.net.Uri
@@ -21,19 +21,17 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.artha.model.HistoryItemData
 import com.example.artha.model.PocketData
-import com.example.artha.ocr.runOCR
 import com.example.artha.ocr.runOCRSuspend
-import com.example.artha.ocr.sendToLLM
 import com.example.artha.ocr.sendToLLMSuspend
 import com.example.artha.util.LocalStorageManager
 import com.example.artha.util.RateLimiter
 import com.example.artha.util.getCurrentDateString
 import com.example.artha.util.getCurrentTimeString
+import com.example.artha.util.groupPengeluaranByMonthAndPocket
 import com.example.artha.util.normalizeAmountFormat
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
-import java.util.UUID
+import java.time.YearMonth
 
 data class ParsedTransaction(
     val title: String,
@@ -44,7 +42,7 @@ data class ParsedTransaction(
 @SuppressLint("RememberReturnType")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ArthaApp(
+fun ScannerReceipt(
     sharedImageUri: Uri?,
     onDone: () -> Unit
 ){
@@ -62,11 +60,19 @@ fun ArthaApp(
     val coroutineScope = rememberCoroutineScope()
     val historyList = remember { mutableStateListOf<HistoryItemData>() }
     val llmRateLimiter = RateLimiter(10000L) // Maks 1 request / 10 detik
+    val currentMonth = YearMonth.now()
+
+    val monthlyBalanceMap by remember(historyList, pocketList) {
+        derivedStateOf {
+            val grouped = groupPengeluaranByMonthAndPocket(historyList, pocketList.associateBy { it.id })
+            grouped[currentMonth] ?: emptyMap()
+        }
+    }
 
     LaunchedEffect("first") {
         try {
             pocketList = LocalStorageManager.loadPockets(context)
-            Log.d("ArthaDebug", "✅ Loaded Pockets: $pocketList")
+            historyList.addAll(LocalStorageManager.loadHistory(context))
         } catch (e: Exception) {
             Log.e("ArthaDebug", "❌ Error loading pockets: ${e.message}")
             pocketList = emptyList()
@@ -144,8 +150,8 @@ fun ArthaApp(
                     BudgetCard(
                         categoryOptions = pocketList,
                         title = parsedTransaction?.title.orEmpty(),
-                        spent = parsedTransaction?.amount ?: 0,
-                        category = parsedTransaction?.category.orEmpty(),
+                        spent = (parsedTransaction?.amount ?: 0),
+                        monthlyBalanceMap,
                         onSubmit = { selectedPocketId, transactionTitle, amount ->
                             val updatedPockets = pocketList.map {
                                 if (it.id == selectedPocketId) {

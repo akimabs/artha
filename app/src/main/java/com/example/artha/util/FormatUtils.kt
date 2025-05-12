@@ -1,11 +1,15 @@
 package com.example.artha.util
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.artha.model.HistoryItemData
+import com.example.artha.model.PocketData
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
@@ -27,8 +31,8 @@ fun formatReadableDate(input: String?): String {
     )
     for (format in formats) {
         try {
-            val parsed = LocalDate.parse(input, DateTimeFormatter.ofPattern(format))
-            return parsed.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+            val parsed = LocalDate.parse(input, DateTimeFormatter.ofPattern(format, Locale("id")))
+            return parsed.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("id")))
         } catch (_: DateTimeParseException) {}
     }
     return input
@@ -45,19 +49,25 @@ fun getCurrentTimeString(): String {
 @RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentDateString(): String {
     val currentDate = LocalDate.now()
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-    return currentDate.format(formatter) // Contoh output: "10 Mei 2025"
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale("id"))
+    return currentDate.format(formatter)
 }
 
 fun extractDigitsOnly(input: String): Int {
     return input.replace(Regex("[^\\d]"), "").toIntOrNull() ?: 0
 }
 
-fun formatPercentage(value: Int): String {
-    val symbols = DecimalFormatSymbols(Locale("in", "ID")).apply {
-        groupingSeparator = '.'
-        decimalSeparator = ','
-    }
-    val formatter = DecimalFormat("#,###", symbols)
-    return formatter.format(value)
+@RequiresApi(Build.VERSION_CODES.O)
+fun groupPengeluaranByMonthAndPocket(
+    historyList: List<HistoryItemData>,
+    pocketMap: Map<String, PocketData>
+): Map<YearMonth, Map<String, Int>> {
+    return historyList.groupBy {
+        val date = LocalDate.parse(it.date, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("id")))
+        YearMonth.of(date.year, date.month)
+    }.mapValues { (_, listPerMonth) ->
+        listPerMonth.groupBy { it.pocketId }
+            .mapValues { (_, perPocket) -> perPocket.sumOf { it.amount } }
+            .filterKeys { pocketMap.containsKey(it) } // keep only valid pockets
+    }.toSortedMap(compareByDescending { it })
 }

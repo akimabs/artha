@@ -1,4 +1,4 @@
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +51,7 @@ fun AddPocketBottomSheet(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedLabelColor = Color(0xFF5AB0F6),
                     focusedBorderColor = Color(0xFF5AB0F6),
+                    cursorColor = Color.Black
                 ),
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
             )
@@ -75,6 +76,7 @@ fun AddPocketBottomSheet(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedLabelColor = Color(0xFF5AB0F6),
                     focusedBorderColor = Color(0xFF5AB0F6),
+                    cursorColor = Color.Black
                 ),
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )

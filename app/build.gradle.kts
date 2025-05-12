@@ -77,7 +77,8 @@ dependencies {
     implementation("com.valentinilk.shimmer:compose-shimmer:1.0.5")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.code.gson:gson:2.10.1") // untuk serialisasi JSON
-
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.33.2-alpha")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

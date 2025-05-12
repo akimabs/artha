@@ -1,15 +1,19 @@
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.artha.model.HistoryItemData
@@ -24,9 +29,11 @@ import com.example.artha.model.PocketData
 import com.example.artha.util.LocalStorageManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.util.fastFirstOrNull
+import com.example.artha.R
+import com.example.artha.util.*
+import java.time.YearMonth
 
 
 @Composable
@@ -51,15 +58,15 @@ fun FilterBadge(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDashboard() {
-    var pocketList by remember { mutableStateOf(emptyList<PocketData>()) }
-    val historyList = remember {
-        mutableStateListOf<HistoryItemData>()
-    }
+fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
+    var pocketList by remember { mutableStateOf<List<PocketData>>(emptyList()) }
+    var historyList by remember { mutableStateOf<List<HistoryItemData>>(emptyList()) }
 
-    val totalPengeluaran = pocketList.sumOf { it.amount }
+    val historyIcon = painterResource(id = R.drawable.history)
+
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf(0xFFFFFFCC.toInt()) }
@@ -75,15 +82,21 @@ fun HomeDashboard() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val currentMonth = remember { YearMonth.now() }
+    val perPocketAmount = remember(historyList) {
+        groupPengeluaranByMonthAndPocket(historyList, pocketList.associateBy { it.id })
+    }
+    val totalThisMonth = perPocketAmount[currentMonth]?.values?.sum() ?: 0
+
     LaunchedEffect(Unit) {
+        historyList = LocalStorageManager.loadHistory(context)
         pocketList = LocalStorageManager.loadPockets(context)
-        historyList.addAll(LocalStorageManager.loadHistory(context))
-//        var storedApiKey = LocalStorageManager.loadApiKey(context)
-//        apiKeyInput = TextFieldValue(storedApiKey)
-//
-//        if (storedApiKey.isBlank()) {
-//            showApiKeyDialog = true
-//        }
+        var storedApiKey = LocalStorageManager.loadApiKey(context)
+        apiKeyInput = TextFieldValue(storedApiKey)
+
+        if (storedApiKey.isBlank()) {
+            showApiKeyDialog = true
+        }
         Log.d("ArthaDebug", "History Loaded: ${historyList.joinToString("\n")}")
     }
 
@@ -135,28 +148,55 @@ fun HomeDashboard() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(42.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Pengeluaran Bulan Ini", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-//                    Icon(
-//                        imageVector = Icons.Default.Settings,
-//                        contentDescription = "Pengaturan API",
-//                        tint = Color.Gray,
-//                        modifier = Modifier
-//                            .size(18.dp)
-//                            .clickable { showApiKeyDialog = true }
-//                    )
+                    Text("Pengeluaran Bulan Ini", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Pengaturan API",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable { showApiKeyDialog = true }
+                    )
                 }
                 Text(
-                    text = "Rp%,d".format(totalPengeluaran),
+                    text = "Rp%,d".format(totalThisMonth),
                     style = MaterialTheme.typography.displayLarge,
                     color = Color.Black
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.Black.copy(alpha = 0.05f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple(bounded = true),
+                            onClick = { onNavigateToHistory() }
+                        )
+                        .padding(horizontal = 12.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        painter = historyIcon,
+                        contentDescription = "History Pocket",
+                        tint = Color.DarkGray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        "History",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                        ),
+                    )
+                }
             }
         }
 
@@ -246,7 +286,7 @@ fun HomeDashboard() {
                         val endPadding = if (index == pocketList.lastIndex) 20.dp else 0.dp
                         PocketCard(
                             title = pocket.title,
-                            amount = pocket.amount,
+                            amount = perPocketAmount[currentMonth]?.get(pocket.id) ?: 0,
                             targetAmount = pocket.targetAmount,
                             backgroundColor = pocket.backgroundColor,
                             isHighlighted = index == highlightedIndex,
@@ -257,7 +297,7 @@ fun HomeDashboard() {
                                 coroutineScope.launch {
                                     LocalStorageManager.deletePocket(context, pocket)
                                     pocketList = LocalStorageManager.loadPockets(context)
-                                    historyList.removeAll { it.pocketId == pocket.id } // ⬅️ ini penting
+                                    historyList = historyList.filterNot { it.pocketId == pocket.id }
                                 }
                             }
                         )
@@ -328,7 +368,7 @@ fun HomeDashboard() {
                                 onDelete = {
                                     coroutineScope.launch {
                                         LocalStorageManager.deleteHistoryItem(context, it)
-                                        historyList.removeIf { h -> h.id == it.id }
+                                        historyList = historyList.filterNot { h -> h.id == it.id }
                                         pocketList = LocalStorageManager.loadPockets(context)
                                     }
                                 }

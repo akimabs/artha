@@ -7,10 +7,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.*
 import androidx.core.view.WindowCompat
-import com.example.artha.ui.screen.ArthaApp
-import com.example.artha.ui.screen.HomeDashboard
+import com.example.artha.ui.AppNavigation
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -19,21 +17,18 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
 
-        val imageUri = intent?.takeIf {
+        var imageUri = intent?.takeIf {
             it.action == Intent.ACTION_SEND && it.type?.startsWith("image/") == true
         }?.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
 
         setContent {
-            var showHome by remember { mutableStateOf(imageUri == null) }
-
-            if (showHome) {
-                HomeDashboard()
-            } else {
-                ArthaApp(
-                    sharedImageUri = imageUri,
-                    onDone = { showHome = true }
-                )
-            }
+            AppNavigation(
+                sharedImageUri = imageUri,
+                clearIntentImage = {
+                    intent.removeExtra(Intent.EXTRA_STREAM)
+                    imageUri = null
+                }
+            )
         }
     }
 }

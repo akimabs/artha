@@ -26,7 +26,7 @@ object LocalStorageManager {
 
     suspend fun loadApiKey(context: Context): String {
         val prefs = context.dataStore.data.first()
-        return prefs[API_KEY] ?: "AIzaSyADjYM8vPmbOEVKuXLq_TomsPii5W7OY1c"
+        return prefs[API_KEY] ?: ""
     }
 
     suspend fun savePockets(context: Context, pockets: List<PocketData>) {

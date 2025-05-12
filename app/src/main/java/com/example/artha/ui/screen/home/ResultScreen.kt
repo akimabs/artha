@@ -1,4 +1,4 @@
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi

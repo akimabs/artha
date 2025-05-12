@@ -1,5 +1,5 @@
 // ui/ShimmerText.kt
-package com.example.artha.ui.screen
+package com.example.artha.ui.screen.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
