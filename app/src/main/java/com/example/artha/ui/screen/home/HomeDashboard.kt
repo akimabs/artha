@@ -36,7 +36,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.util.fastFirstOrNull
 import com.example.artha.R
 import com.example.artha.util.*
+import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
@@ -79,8 +82,6 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
     var showApiKeyDialog by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(TextFieldValue("")) }
     var selectedPocket by remember { mutableStateOf<String?>(null) }
-    val apiKeyRegex = Regex("^AIza[0-9A-Za-z_-]{35}$")
-    val isValid = apiKeyRegex.matches(apiKeyInput.text)
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -392,10 +393,15 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val filteredHistory = if (selectedPocket != null) {
-                            historyList.filter { it.pocketId == selectedPocket }
-                        } else {
-                            historyList
+                        val filteredHistory = historyList.filter { item ->
+                            val itemDate = try {
+                                LocalDate.parse(item.date, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("id")))
+                            } catch (_: Exception) {
+                                null
+                            }
+                            val isInCurrentMonth = itemDate?.let { YearMonth.from(it) == currentMonth } ?: false
+
+                            (selectedPocket == null || item.pocketId == selectedPocket) && isInCurrentMonth
                         }
 
                         filteredHistory.forEach {
