@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.artha.model.HistoryItemData
@@ -159,10 +160,14 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Pengeluaran Bulan Ini", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                    Text(
+                        stringResource(R.string.monthly_expenses),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan API",
+                        contentDescription = stringResource(R.string.set_gemini_api_key),
                         tint = Color.Gray,
                         modifier = Modifier
                             .size(18.dp)
@@ -195,7 +200,7 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        "History",
+                        stringResource(R.string.history),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontSize = MaterialTheme.typography.titleMedium.fontSize,
                         ),
@@ -207,10 +212,10 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
         if (showApiKeyDialog) {
             AlertDialog(
                 onDismissRequest = { showApiKeyDialog = false },
-                title = { Text("Setel API Key Gemini") },
+                title = { Text(stringResource(R.string.set_gemini_api_key)) },
                 text = {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text("Masukkan API Key kamu di bawah ini.")
+                        Text(stringResource(R.string.enter_api_key))
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = apiKeyInput,
@@ -221,20 +226,20 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                                 cursorColor = Color.Black
                             ),
                             singleLine = true,
-                            label = { Text("API Key") }
+                            label = { Text(stringResource(R.string.api_key)) }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Divider()
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "Belum punya API Key?",
+                                stringResource(R.string.no_api_key),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray,
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "Buat sekarang",
+                                stringResource(R.string.create_now),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFF5AB0F6),
                                 fontWeight = FontWeight.Bold,
@@ -258,7 +263,7 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                             }
                         }
                     }) {
-                        Text("Simpan", color = Color.Black)
+                        Text(stringResource(R.string.save), color = Color.Black)
                     }
                 },
                 dismissButton = {
@@ -271,7 +276,7 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                             }
                         }
                     ) {
-                        Text("Batal", color = Color.Gray)
+                        Text(stringResource(R.string.cancel), color = Color.Gray)
                     }
                 }
             )
@@ -284,10 +289,10 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Saku Kamu", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.your_pockets), style = MaterialTheme.typography.titleLarge)
                     if(!pocketList.isEmpty()){
                         Text(
-                            "+ Tambah Saku",
+                            stringResource(R.string.add_pocket),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontSize = MaterialTheme.typography.titleMedium.fontSize,
                                 fontWeight = FontWeight.Bold
@@ -315,7 +320,7 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Add, contentDescription = "Tambah Saku", tint = Color(0xFF0D8CF2))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Tambah Saku", color = Color(0xFF0D8CF2))
+                            Text(stringResource(R.string.add_pocket), color = Color(0xFF0D8CF2))
                         }
                     }
                 }
@@ -348,13 +353,13 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
 
             Spacer(modifier = Modifier.height(30.dp))
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                Text("Riwayat Pengeluaran", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.expense_history), style = MaterialTheme.typography.titleLarge)
             }
             if (pocketList.isNotEmpty()) {
                 LazyRow {
                     item {
                         FilterBadge(
-                            label = "Semua",
+                            label = stringResource(R.string.all),
                             selected = selectedPocket == null,
                             onClick = { selectedPocket = null },
                             modifier = Modifier.padding(start = 20.dp, end = 0.dp, top = 15.dp)
@@ -389,7 +394,7 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                             .background(Color.Transparent),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Belum ada transaksi tercatat", color = Color.Gray)
+                        Text(stringResource(R.string.no_transactions), color = Color.Gray)
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

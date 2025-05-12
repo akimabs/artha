@@ -8,7 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.artha.R
 import com.example.artha.util.formatReadableDate
 import org.json.JSONObject
 
@@ -48,14 +50,14 @@ fun ResultScreen(parsedJson: String, isLoading: Boolean) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Indonesia Rupiah", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.indonesian_rupiah), style = MaterialTheme.typography.titleMedium)
             Text("%,d".format(displayAmount), style = MaterialTheme.typography.displayLarge)
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            InfoRow(label = "Nama:", value = bank, isLoading = isLoading)
-            InfoRow(label = "Tanggal Transaksi:", value = date, isLoading = isLoading)
-            InfoRow(label = "Kategori:", value = category, isLoading = isLoading)
+            InfoRow(label = stringResource(R.string.name), value = bank, isLoading = isLoading)
+            InfoRow(label = stringResource(R.string.transaction_date), value = date, isLoading = isLoading)
+            InfoRow(label = stringResource(R.string.category), value = category, isLoading = isLoading)
         }
     }
 }

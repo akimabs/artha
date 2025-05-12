@@ -24,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.artha.R
 import com.example.artha.model.HistoryItemData
 import com.example.artha.model.PocketData
 import com.example.artha.util.LocalStorageManager
@@ -54,10 +56,10 @@ fun HistoryScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Riwayat Perbulanan") },
+                title = { Text(stringResource(R.string.monthly_history)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -74,7 +76,7 @@ fun HistoryScreen(onBack: () -> Unit) {
                 .padding(16.dp)
         ) {
             if (monthlyByPocket.isEmpty()) {
-                Text("Belum ada data transaksi.", color = Color.Gray)
+                Text(stringResource(R.string.no_transaction_data), color = Color.Gray)
             } else {
                 monthlyByPocket.forEach { (yearMonth, pocketSummary) ->
                     val isExpanded = expandedMonth == yearMonth
@@ -116,7 +118,7 @@ fun HistoryScreen(onBack: () -> Unit) {
                                     Spacer(Modifier.width(8.dp))
                                     Icon(
                                         imageVector = if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "Toggle",
+                                        contentDescription = stringResource(R.string.toggle),
                                         tint = Color.Gray
                                     )
                                 }

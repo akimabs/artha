@@ -23,6 +23,7 @@ Scan your receipts, extract expenses instantly, and track monthly spending per c
 - 💾 Local storage only — No internet required (except OCR+LLM)
 - 🔐 API Key input for Gemini
 - ✅ Animated UI (Compose) with progress feedback and drag-to-reorder
+- 🌐 Localization support (English & Indonesian)
 - 🚀 Fast, minimal dependencies, Compose-first
 
 ---
@@ -32,6 +33,16 @@ Scan your receipts, extract expenses instantly, and track monthly spending per c
 - 🐙 [Get it on GitHub](https://github.com/namalu/artha) – manual build from source
 - 📦 F-Droid / IzzyOnDroid (coming soon)
 - 📱 Requires Android 8.0+ (API 26+)
+
+---
+
+## 🌐 Localization
+
+Artha supports multiple languages:
+- 🇬🇧 English (default)
+- 🇮🇩 Indonesian
+
+The app automatically uses your device's language settings. If your language isn't supported, it will fall back to English.
 
 ---
 

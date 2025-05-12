@@ -15,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.artha.R
 import com.example.artha.model.PocketData
 import com.example.artha.util.extractDigitsOnly
 
@@ -39,11 +41,11 @@ fun AddPocketBottomSheet(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
-            Text("Tambah Saku Baru", style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.add_new_pocket), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                label = { Text("Nama Saku") },
+                label = { Text(stringResource(R.string.pocket_name)) },
                 value = title,
                 onValueChange = { title = it },
                 shape = RoundedCornerShape(10.dp),
@@ -57,7 +59,7 @@ fun AddPocketBottomSheet(
             )
 
             OutlinedTextField(
-                label = { Text("Jumlah Target") },
+                label = { Text(stringResource(R.string.target_amount)) },
                 value = target,
                 onValueChange = { newValue ->
                     val digitsOnly = newValue.text.replace(Regex("[^\\d]"), "")
@@ -82,7 +84,7 @@ fun AddPocketBottomSheet(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Text("Pilih Warna")
+            Text(stringResource(R.string.select_color))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(vertical = 12.dp)
@@ -138,7 +140,7 @@ fun AddPocketBottomSheet(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Simpan", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.save_pocket), color = Color.White, style = MaterialTheme.typography.titleMedium)
             }
         }
     }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Artha</string>
+    
+    <!-- Home Screen -->
+    <string name="monthly_expenses">Pengeluaran Bulan Ini</string>
+    <string name="history">Riwayat</string>
+    <string name="add_pocket">Tambah Saku</string>
+    <string name="no_transaction_data">Belum ada data transaksi.</string>
+    <string name="overbudget">Melebihi Anggaran!</string>
+    <string name="your_pockets">Saku Kamu</string>
+    <string name="expense_history">Riwayat Pengeluaran</string>
+    <string name="all">Semua</string>
+    <string name="no_transactions">Belum ada transaksi tercatat</string>
+    <string name="cancel">Batal</string>
+    <string name="save_pocket">Simpan</string>
+    
+    <!-- Add Pocket Bottom Sheet -->
+    <string name="add_new_pocket">Tambah Saku Baru</string>
+    <string name="pocket_name">Nama Saku</string>
+    <string name="target_amount">Jumlah Target</string>
+    <string name="select_color">Pilih Warna</string>
+    
+    <!-- API Key Dialog -->
+    <string name="set_gemini_api_key">Setel API Key Gemini</string>
+    <string name="enter_api_key">Masukkan API Key kamu di bawah ini.</string>
+    <string name="api_key">API Key</string>
+    <string name="no_api_key">Belum punya API Key?</string>
+    <string name="create_now">Buat sekarang</string>
+    <string name="save">Simpan</string>
+    
+    <!-- Result Screen -->
+    <string name="indonesian_rupiah">Rupiah Indonesia</string>
+    <string name="name">Nama</string>
+    <string name="transaction_date">Tanggal Transaksi</string>
+    <string name="category">Kategori</string>
+    
+    <!-- History Screen -->
+    <string name="delete">Hapus</string>
+    <string name="monthly_history">Riwayat Perbulanan</string>
+    <string name="back">Kembali</string>
+    <string name="toggle">Buka/Tutup</string>
+</resources> 

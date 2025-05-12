@@ -1,3 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Artha</string>
+    
+    <!-- Home Screen -->
+    <string name="monthly_expenses">Monthly Expenses</string>
+    <string name="history">History</string>
+    <string name="add_pocket">Add Pocket</string>
+    <string name="no_transaction_data">No transaction data available.</string>
+    <string name="overbudget">Overbudget!</string>
+    <string name="your_pockets">Your Pockets</string>
+    <string name="expense_history">Expense History</string>
+    <string name="all">All</string>
+    <string name="no_transactions">No transactions recorded yet</string>
+    <string name="cancel">Cancel</string>
+    <string name="save_pocket">Save</string>
+    
+    <!-- Add Pocket Bottom Sheet -->
+    <string name="add_new_pocket">Add New Pocket</string>
+    <string name="pocket_name">Pocket Name</string>
+    <string name="target_amount">Target Amount</string>
+    <string name="select_color">Select Color</string>
+    
+    <!-- API Key Dialog -->
+    <string name="set_gemini_api_key">Set Gemini API Key</string>
+    <string name="enter_api_key">Enter your API key below.</string>
+    <string name="api_key">API Key</string>
+    <string name="no_api_key">Don\'t have an API key?</string>
+    <string name="create_now">Create now</string>
+    <string name="save">Save</string>
+    
+    <!-- Result Screen -->
+    <string name="indonesian_rupiah">Indonesian Rupiah</string>
+    <string name="name">Name</string>
+    <string name="transaction_date">Transaction Date</string>
+    <string name="category">Category</string>
+    
+    <!-- History Screen -->
+    <string name="delete">Delete</string>
+    <string name="monthly_history">Monthly History</string>
+    <string name="back">Back</string>
+    <string name="toggle">Toggle</string>
 </resources>
