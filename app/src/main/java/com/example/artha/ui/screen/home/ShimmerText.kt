@@ -17,7 +17,7 @@ fun ShimmerText(modifier: Modifier = Modifier) {
     val shimmerInstance = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     Box(
         modifier = modifier
-            .height(20.dp)
+            .height(17.dp)
             .width(120.dp)
             .shimmer(shimmerInstance)
             .background(

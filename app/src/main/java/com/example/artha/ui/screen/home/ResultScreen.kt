@@ -4,9 +4,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -16,7 +16,10 @@ import org.json.JSONObject
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ResultScreen(parsedJson: String, isLoading: Boolean) {
+fun ResultScreen(
+    parsedJson: String, 
+    isLoading: Boolean
+) {
     var amount by remember { mutableIntStateOf(0) }
     val displayAmount by animateIntAsState(targetValue = amount, label = "amountAnim")
     var bank by remember { mutableStateOf<String?>(null) }

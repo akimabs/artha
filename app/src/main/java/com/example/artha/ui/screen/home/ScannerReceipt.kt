@@ -50,6 +50,8 @@ fun ScannerReceipt(
     var parsedResult by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var parsedTransaction by remember { mutableStateOf<ParsedTransaction?>(null) }
+    var currentImageUri by remember { mutableStateOf<Uri?>(null) }
+    var hasError by remember { mutableStateOf(false) }
 
     var pocketList by remember {
         mutableStateOf(listOf<PocketData>())
@@ -69,6 +71,29 @@ fun ScannerReceipt(
         }
     }
 
+    fun processImage(uri: Uri) {
+        coroutineScope.launch {
+            isLoading = true
+            hasError = false
+            parsedResult = "" // Reset parsedResult to show loading state
+            try {
+                val rawText = runOCRSuspend(context, uri)
+                val cleanedText = normalizeAmountFormat(rawText)
+                llmRateLimiter.run {
+                    val apiKey = LocalStorageManager.loadApiKey(context)
+                    val result = sendToLLMSuspend(apiKey, cleanedText)
+                    parsedResult = result
+                }
+            } catch (e: Exception) {
+                Log.e("ArthaDebug", "❌ Error processing image: ${e.message}")
+                parsedResult = "{\"text\":\"{\\\"error\\\":\\\"${e.message}\\\"}\"}"
+                hasError = true
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     LaunchedEffect("first") {
         try {
             pocketList = LocalStorageManager.loadPockets(context)
@@ -81,20 +106,10 @@ fun ScannerReceipt(
 
     LaunchedEffect(sharedImageUri) {
         sharedImageUri?.let { uri ->
-            isLoading = true
-
-            val rawText = runOCRSuspend(context, uri)
-            val cleanedText = normalizeAmountFormat(rawText)
-            llmRateLimiter.run {
-                val apiKey = LocalStorageManager.loadApiKey(context)
-                val result = sendToLLMSuspend(apiKey, cleanedText)
-
-                parsedResult = result
-                isLoading = false
-            }
+            currentImageUri = uri
+            processImage(uri)
         }
     }
-
 
     LaunchedEffect(parsedResult) {
         try {
@@ -111,15 +126,17 @@ fun ScannerReceipt(
                 )
 
                 Log.d("ArthaDebug", "✅ ParsedTransaction: $parsedTransaction")
+                hasError = false
             }
         } catch (e: Exception) {
             Log.e("ArthaDebug", "❌ Parsing error: ${e.message}")
             parsedTransaction = null
+            hasError = true
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        sharedImageUri?.let {
+        currentImageUri?.let {
             Image(
                 painter = rememberAsyncImagePainter(it),
                 contentDescription = null,
@@ -144,14 +161,22 @@ fun ScannerReceipt(
             color = Color.White
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                ResultScreen(parsedJson = parsedResult, isLoading = isLoading)
+                ResultScreen(
+                    parsedJson = parsedResult,
+                    isLoading = isLoading
+                )
                 Spacer(modifier = Modifier.height(30.dp))
-                if (pocketList.isNotEmpty()) {
                     BudgetCard(
                         categoryOptions = pocketList,
                         title = parsedTransaction?.title.orEmpty(),
                         spent = (parsedTransaction?.amount ?: 0),
                         monthlyBalanceMap,
+                        isLoading = isLoading,
+                        onRetry = {
+                            currentImageUri?.let { uri ->
+                                processImage(uri)
+                            }
+                        },
                         onSubmit = { selectedPocketId, transactionTitle, amount ->
                             val updatedPockets = pocketList.map {
                                 if (it.id == selectedPocketId) {
@@ -183,9 +208,6 @@ fun ScannerReceipt(
                             }
                         }
                     )
-                } else {
-                    Text("Sedang memuat data saku...", color = Color.Gray)
-                }
             }
         }
     }
