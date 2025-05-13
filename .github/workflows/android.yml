@@ -37,7 +37,7 @@ jobs:
         id: get_sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Inject download link to README
+      - name: Inject download link to readme.md
         run: |
           echo "## 🔗 Latest APK (Release)" > latest-apk.md
           echo "" >> latest-apk.md
@@ -47,13 +47,13 @@ jobs:
           echo '<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" width="200"/>' >> latest-apk.md
           echo '</a>' >> latest-apk.md
           echo "" >> latest-apk.md
-          awk '/<!-- APK-DOWNLOAD -->/ { print; system("cat latest-apk.md"); next } 1' README.md > tmp && mv tmp README.md
+          awk '/<!-- APK-DOWNLOAD -->/ { print; system("cat latest-apk.md"); next } 1' readme.md > tmp && mv tmp readme.md
 
-      - name: Commit updated README.md
+      - name: Commit updated readme.md
         uses: EndBug/add-and-commit@v9
         with:
-          message: "Update README with release APK link"
-          add: "README.md"
+          message: "Update readme.md with release APK link"
+          add: "readme.md"
           branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
