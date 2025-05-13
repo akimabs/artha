@@ -20,6 +20,8 @@
     <string name="pocket_name">Pocket Name</string>
     <string name="target_amount">Target Amount</string>
     <string name="select_color">Select Color</string>
+    <string name="percentage_of_monthly">This is %d%% of your monthly funds</string>
+    <string name="set_initial_funds_first">Set monthly funds first</string>
     
     <!-- API Key Dialog -->
     <string name="set_gemini_api_key">Set Gemini API Key</string>
@@ -40,4 +42,10 @@
     <string name="monthly_history">Monthly History</string>
     <string name="back">Back</string>
     <string name="toggle">Toggle</string>
+    
+    <!-- New resources -->
+    <string name="set_initial_funds">Set Initial Month Funds</string>
+    <string name="initial_funds">Initial Funds</string>
+    <string name="initial_funds_amount">Initial: %s</string>
+    <string name="add_initial_funds">Add Initial Funds</string>
 </resources>

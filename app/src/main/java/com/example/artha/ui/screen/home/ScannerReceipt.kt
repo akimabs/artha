@@ -162,7 +162,7 @@ fun ScannerReceipt(
                                 title = transactionTitle,
                                 amount = amount,
                                 time = getCurrentTimeString(),
-                                date = "12 April 2025",
+                                date = getCurrentDateString(),
                                 pocketId = selectedPocketId,
                             )
 

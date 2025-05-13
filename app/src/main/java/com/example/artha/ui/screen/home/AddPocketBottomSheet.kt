@@ -15,14 +15,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import com.example.artha.R
 import com.example.artha.model.PocketData
-import com.example.artha.util.extractDigitsOnly
+import com.example.artha.util.LocalStorageManager
+import java.util.UUID
 
 @Composable
 fun AddPocketBottomSheet(
@@ -33,6 +35,30 @@ fun AddPocketBottomSheet(
 ) {
     var title by remember { mutableStateOf(TextFieldValue("")) }
     var target by remember { mutableStateOf(TextFieldValue("")) }
+    var initialFunds by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        initialFunds = LocalStorageManager.loadInitialFunds(context)
+    }
+
+    val percentage = if (initialFunds.isNotEmpty() && target.text.isNotEmpty()) {
+        val targetAmount = target.text.replace(Regex("[^\\d]"), "").toLongOrNull() ?: 0L
+        val initialAmount = initialFunds.replace(Regex("[^\\d]"), "").toLongOrNull() ?: 0L
+        if (initialAmount > 0) {
+            (targetAmount.toDouble() / initialAmount * 100).toInt()
+        } else 0
+    } else 0
+
+    fun setTargetFromPercentage(percentage: Int) {
+        val initialAmount = initialFunds.replace(Regex("[^\\d]"), "").toLongOrNull() ?: 0L
+        if (initialAmount > 0) {
+            val targetAmount = (initialAmount * percentage / 100)
+            val formatted = "Rp " + "%,d".format(targetAmount).replace(',', '.')
+            target = TextFieldValue(formatted, TextRange(formatted.length))
+        }
+    }
+
     val isFormValid = title.text.isNotBlank() && target.text.contains(Regex("\\d"))
 
     Surface(
@@ -69,8 +95,7 @@ fun AddPocketBottomSheet(
                     } else {
                         ""
                     }
-                    target =
-                        newValue.copy(text = formatted, selection = TextRange(formatted.length))
+                    target = newValue.copy(text = formatted, selection = TextRange(formatted.length))
                 },
                 shape = RoundedCornerShape(10.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -80,8 +105,44 @@ fun AddPocketBottomSheet(
                     focusedBorderColor = Color(0xFF5AB0F6),
                     cursorColor = Color.Black
                 ),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 0.dp)
             )
+
+            if (initialFunds.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(50, 30, 20).forEach { percent ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple(bounded = true)
+                                ) { setTargetFromPercentage(percent) }
+                                .background(Color(0xFFE0E0E0))
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "$percent%",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (initialFunds.isNotEmpty() && target.text.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.percentage_of_monthly, percentage),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
             Text(stringResource(R.string.select_color))
@@ -97,12 +158,12 @@ fun AddPocketBottomSheet(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(16.dp))
                             .background(Color(colorInt))
                             .border(
                                 2.dp,
                                 if (selectedColor == colorInt) Color(0xFF5AB0F6) else Color.Transparent,
-                                CircleShape
+                                RoundedCornerShape(16.dp)
                             )
                             .clickable(
                                 indication = rememberRipple(bounded = true, radius = 20.dp),
@@ -129,10 +190,11 @@ fun AddPocketBottomSheet(
                         indication = rememberRipple(bounded = true),
                         onClick = {
                             val pocket = PocketData(
+                                id = UUID.randomUUID().toString(),
                                 title = title.text,
                                 amount = 0,
                                 backgroundColorInt = selectedColor,
-                                targetAmount = extractDigitsOnly(target.text)
+                                targetAmount = target.text.replace(Regex("[^\\d]"), "").toIntOrNull() ?: 0
                             )
                             onAddPocket(pocket)
                             onDismiss()

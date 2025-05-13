@@ -17,6 +17,7 @@ object LocalStorageManager {
     private val POCKET_LIST_KEY = stringPreferencesKey("pocket_list")
     private val HISTORY_LIST_KEY = stringPreferencesKey("history_list")
     private val API_KEY = stringPreferencesKey("api_key")
+    private val INITIAL_FUNDS_KEY = stringPreferencesKey("initial_funds")
 
     suspend fun saveApiKey(context: Context, key: String) {
         context.dataStore.edit { prefs ->
@@ -31,7 +32,9 @@ object LocalStorageManager {
 
     suspend fun savePockets(context: Context, pockets: List<PocketData>) {
         val json = gson.toJson(pockets)
-        context.dataStore.edit { it[POCKET_LIST_KEY] = json }
+        context.dataStore.edit { prefs ->
+            prefs[POCKET_LIST_KEY] = json
+        }
     }
 
     suspend fun loadPockets(context: Context): List<PocketData> {
@@ -43,7 +46,9 @@ object LocalStorageManager {
 
     suspend fun saveHistory(context: Context, history: List<HistoryItemData>) {
         val json = gson.toJson(history)
-        context.dataStore.edit { it[HISTORY_LIST_KEY] = json }
+        context.dataStore.edit { prefs ->
+            prefs[HISTORY_LIST_KEY] = json
+        }
     }
 
     suspend fun appendHistory(context: Context, newItem: HistoryItemData) {
@@ -76,5 +81,16 @@ object LocalStorageManager {
 
         val updatedHistory = loadHistory(context).filterNot { it.pocketId == pocket.id }
         saveHistory(context, updatedHistory)
+    }
+
+    suspend fun saveInitialFunds(context: Context, amount: String) {
+        context.dataStore.edit { prefs ->
+            prefs[INITIAL_FUNDS_KEY] = amount
+        }
+    }
+
+    suspend fun loadInitialFunds(context: Context): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[INITIAL_FUNDS_KEY] ?: ""
     }
 }

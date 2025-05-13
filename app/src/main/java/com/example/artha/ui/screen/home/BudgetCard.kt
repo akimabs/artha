@@ -103,10 +103,11 @@ fun BudgetCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(response.title)
-                            val isOver = response.amount > response.targetAmount
+                            val currentAmount = monthlyBalanceMap[response.id] ?: 0
+                            val isOver = currentAmount > response.targetAmount
                             Row {
                                 Text(
-                                    text = "Rp %,d/".format(response.amount),
+                                    text = "Rp %,d/".format(currentAmount),
                                     color = if (isOver) Color.Red else Color.Gray,
                                     style = MaterialTheme.typography.bodyMedium
                                 )

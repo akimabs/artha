@@ -20,6 +20,7 @@
     <string name="pocket_name">Nama Saku</string>
     <string name="target_amount">Jumlah Target</string>
     <string name="select_color">Pilih Warna</string>
+    <string name="percentage_of_monthly">Ini adalah %d%% dari dana bulanan Anda</string>
     
     <!-- API Key Dialog -->
     <string name="set_gemini_api_key">Setel API Key Gemini</string>
@@ -40,4 +41,11 @@
     <string name="monthly_history">Riwayat Perbulanan</string>
     <string name="back">Kembali</string>
     <string name="toggle">Buka/Tutup</string>
+    
+    <!-- New resources -->
+    <string name="set_initial_funds">Atur Dana Awal Bulanan</string>
+    <string name="initial_funds">Dana Awal</string>
+    <string name="initial_funds_amount">Dana Awal: %s</string>
+    <string name="add_initial_funds">Tambah Dana Awal</string>
+    <string name="set_initial_funds_first">Atur dana bulanan terlebih dahulu</string>
 </resources> 

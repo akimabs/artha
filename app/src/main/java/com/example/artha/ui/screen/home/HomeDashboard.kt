@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
@@ -26,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.artha.model.HistoryItemData
 import com.example.artha.model.PocketData
@@ -83,6 +87,9 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
     var showApiKeyDialog by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(TextFieldValue("")) }
     var selectedPocket by remember { mutableStateOf<String?>(null) }
+    var showInitialFundsSheet by remember { mutableStateOf(false) }
+    var initialFunds by remember { mutableStateOf(TextFieldValue("")) }
+    var initialFundsInput by remember { mutableStateOf(TextFieldValue("")) }
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -98,6 +105,12 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
         pocketList = LocalStorageManager.loadPockets(context)
         var storedApiKey = LocalStorageManager.loadApiKey(context)
         apiKeyInput = TextFieldValue(storedApiKey)
+
+        // Load initial funds
+        val storedInitialFunds = LocalStorageManager.loadInitialFunds(context)
+        if (storedInitialFunds.isNotEmpty()) {
+            initialFunds = TextFieldValue(storedInitialFunds)
+        }
 
         if (storedApiKey.isBlank()) {
             showApiKeyDialog = true
@@ -165,46 +178,193 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.Gray
                     )
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.set_gemini_api_key),
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clickable { showApiKeyDialog = true }
-                    )
                 }
                 Text(
                     text = "Rp%,d".format(totalThisMonth),
                     style = MaterialTheme.typography.displayLarge,
                     color = Color.Black
                 )
+                val initialFundsAmount = initialFunds.text.replace(Regex("[^\\d]"), "").toLongOrNull() ?: 0L
+                if (initialFundsAmount > 0) {
+                    val percentage = (totalThisMonth.toFloat() / initialFundsAmount.toFloat() * 100).toInt()
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Ini adalah",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = "$percentage%",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = if (percentage > 100) Color.Red else Color.Gray
+                        )
+                        Text(
+                            text = "dari dana bulanan Anda",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.Black.copy(alpha = 0.05f))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = rememberRipple(bounded = true),
-                            onClick = { onNavigateToHistory() }
-                        )
-                        .padding(horizontal = 12.dp, vertical = 13.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = historyIcon,
-                        contentDescription = "History Pocket",
-                        tint = Color.DarkGray,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.05f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true),
+                                onClick = { showInitialFundsSheet = true }
+                            )
+                            .padding(horizontal = 12.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        if (initialFunds.text.isEmpty()) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = Color.DarkGray,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Text(
+                            text = if (initialFunds.text.isNotEmpty()) {
+                                stringResource(R.string.initial_funds_amount, initialFunds.text)
+                            } else {
+                                stringResource(R.string.add_initial_funds)
+                            },
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            ),
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.05f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true),
+                                onClick = { onNavigateToHistory() }
+                            )
+                            .padding(horizontal = 12.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            painter = historyIcon,
+                            contentDescription = "History Pocket",
+                            tint = Color.DarkGray,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            stringResource(R.string.history),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            ),
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.05f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true),
+                                onClick = { showApiKeyDialog = true }
+                            )
+                            .padding(horizontal = 13.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.set_gemini_api_key),
+                            tint = Color.DarkGray,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        if (showInitialFundsSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { 
+                    showInitialFundsSheet = false
+                    initialFundsInput = TextFieldValue(initialFunds.text)
+                },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
                     Text(
-                        stringResource(R.string.history),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                        ),
+                        stringResource(R.string.set_initial_funds),
+                        style = MaterialTheme.typography.titleLarge
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = initialFundsInput,
+                        onValueChange = { newValue ->
+                            val digitsOnly = newValue.text.replace(Regex("[^\\d]"), "")
+                            val formatted = if (digitsOnly.isNotEmpty()) {
+                                val number = digitsOnly.toLongOrNull() ?: 0L
+                                "Rp " + "%,d".format(number).replace(',', '.')
+                            } else {
+                                ""
+                            }
+                            initialFundsInput = newValue.copy(text = formatted, selection = TextRange(formatted.length))
+                        },
+                        label = { Text(stringResource(R.string.initial_funds)) },
+                        shape = RoundedCornerShape(10.dp),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedLabelColor = Color(0xFF5AB0F6),
+                            focusedBorderColor = Color(0xFF5AB0F6),
+                            cursorColor = Color.Black
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xFF5AB0F6))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        LocalStorageManager.saveInitialFunds(context, initialFundsInput.text)
+                                        initialFunds = initialFundsInput
+                                        showInitialFundsSheet = false
+                                    }
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            stringResource(R.string.save),
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
         }
@@ -298,7 +458,13 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                                 fontWeight = FontWeight.Bold
                             ),
                             color = Color(0xFF0D8CF2),
-                            modifier = Modifier.clickable { showBottomSheet = true }
+                            modifier = Modifier.clickable { 
+                                if (initialFunds.text.isNotEmpty()) {
+                                    showBottomSheet = true
+                                } else {
+                                    showInitialFundsSheet = true
+                                }
+                            }
                         )
                     }
                 }
@@ -314,13 +480,26 @@ fun HomeDashboard(onNavigateToHistory: () -> Unit = {}) {
                             .height(100.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .background(Color(0xFFEEEEEE))
-                            .clickable { showBottomSheet = true },
+                            .clickable { 
+                                if (initialFunds.text.isNotEmpty()) {
+                                    showBottomSheet = true
+                                } else {
+                                    showInitialFundsSheet = true
+                                }
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Add, contentDescription = "Tambah Saku", tint = Color(0xFF0D8CF2))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_pocket), color = Color(0xFF0D8CF2))
+                            Text(
+                                text = if (initialFunds.text.isEmpty()) {
+                                    stringResource(R.string.set_initial_funds_first)
+                                } else {
+                                    stringResource(R.string.add_pocket)
+                                },
+                                color = Color(0xFF0D8CF2)
+                            )
                         }
                     }
                 }
