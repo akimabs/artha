@@ -3,6 +3,10 @@
 A lightweight budgeting app powered by OCR and LLM.  
 Scan your receipts, extract expenses instantly, and track monthly spending per category.
 
+---
+
+## Screenshots
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/01.jpeg" width="200"/>
   <img src="https://raw.githubusercontent.com/akimabs/artha/refs/heads/main/screenshot/02.jpeg" width="200"/>
@@ -12,7 +16,7 @@ Scan your receipts, extract expenses instantly, and track monthly spending per c
 
 ---
 
-## ✨ Features
+## Features
 
 - 📷 Scan receipts and extract transaction info with OCR + Gemini
 - 📊 Monthly expense summary (auto-grouped by Pocket & Month)
@@ -28,17 +32,16 @@ Scan your receipts, extract expenses instantly, and track monthly spending per c
 
 ---
 
-## 📦 Installation
+## Download
 
-- 🐙 [Get it on GitHub](https://github.com/namalu/artha) – manual build from source
-- 📦 F-Droid / IzzyOnDroid (coming soon)
-- 📱 Requires Android 8.0+ (API 26+)
+  <img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" a="https://github.com/akimabs/artha/actions/workflows/android.yml" width="200"/>
 
 ---
 
 ## 🌐 Localization
 
 Artha supports multiple languages:
+
 - 🇬🇧 English (default)
 - 🇮🇩 Indonesian
 
