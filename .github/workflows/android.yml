@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "Built from commit \`${{ steps.get_sha.outputs.sha_short }}\`:" >> latest-apk.md
           echo "" >> latest-apk.md
-          echo '<a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">' >> latest-apk.md
+          echo '<a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts">' >> latest-apk.md
           echo '<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" width="200"/>' >> latest-apk.md
           echo '</a>' >> latest-apk.md
           echo "" >> latest-apk.md
