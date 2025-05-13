@@ -33,6 +33,12 @@ Scan your receipts, extract expenses instantly, and track monthly spending per c
 ## Download
 
 <!-- APK-DOWNLOAD -->
+Built from commit `7ca7f17`:
+
+<a href="https://github.com/akimabs/artha/actions/runs/14995127772#artifacts">
+<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" width="200"/>
+</a>
+
 Built from commit `0352e11`:
 
 <a href="https://github.com/akimabs/artha/actions/runs/14993398591#artifacts">
