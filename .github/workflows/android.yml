@@ -2,46 +2,58 @@ name: Android CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           cache: gradle
-          
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-        
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
-        
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
+
+      - name: Build with Gradle (Release)
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK (Release)
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
-          
-      - name: Delete old artifacts
-        uses: geekyeggo/delete-artifact@v2
-        with:
-          name: app-debug
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Update README with download link
+          name: app-release
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Get commit SHA
+        id: get_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Inject download link to README
+        run: |
+          echo "## 🔗 Latest APK (Release)" > latest-apk.md
+          echo "" >> latest-apk.md
+          echo "Built from commit \`${{ steps.get_sha.outputs.sha_short }}\`:" >> latest-apk.md
+          echo "" >> latest-apk.md
+          echo '<a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">' >> latest-apk.md
+          echo '<img src="https://user-images.githubusercontent.com/663460/26973090-f8fdc986-4d14-11e7-995a-e7c5e79ed925.png" width="200"/>' >> latest-apk.md
+          echo '</a>' >> latest-apk.md
+          echo "" >> latest-apk.md
+          awk '/<!-- APK-DOWNLOAD -->/ { print; system("cat latest-apk.md"); next } 1' README.md > tmp && mv tmp README.md
+
+      - name: Commit updated README.md
         uses: EndBug/add-and-commit@v9
         with:
-          message: 'Update download link'
-          add: 'README.md'
+          message: "Update README with release APK link"
+          add: "README.md"
           branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

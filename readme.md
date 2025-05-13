@@ -3,8 +3,6 @@
 A lightweight budgeting app powered by OCR and LLM.  
 Scan your receipts, extract expenses instantly, and track monthly spending per category.
 
----
-
 ## Screenshots
 
 <p align="center">
